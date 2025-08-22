@@ -1,0 +1,101 @@
+-- Database: Dados
+
+-- DROP DATABASE IF EXISTS "Dados";
+
+/*CREATE DATABASE "Dados"
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'pt_BR.UTF-8'
+    LC_CTYPE = 'pt_BR.UTF-8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+*/
+-- Usuaios
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Raças
+CREATE TABLE breeds (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Animais
+CREATE TABLE animals (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(50),
+    breed_id BIGINT REFERENCES breeds(id) ON DELETE SET NULL,
+    age INT,
+	earring INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Colares
+CREATE TABLE devices (
+    id BIGSERIAL PRIMARY KEY,
+    serial_number VARCHAR(100) UNIQUE NOT NULL,
+	codigo INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Relação entre dispositivos e animais
+CREATE TABLE device_animals (
+    id BIGSERIAL PRIMARY KEY,
+    device_id BIGINT REFERENCES devices(id) ON DELETE CASCADE,
+    animal_id BIGINT REFERENCES animals(id) ON DELETE CASCADE,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- evita duplicar o mesmo colar para a mesma vaca na mesma data
+    CONSTRAINT unique_device_animal_period UNIQUE (device_id, animal_id, start_date)
+);
+
+-- Leituras das sensores
+CREATE TABLE readings (
+    id BIGSERIAL PRIMARY KEY,
+    device_id BIGINT REFERENCES devices(id) ON DELETE CASCADE,
+    animal_id BIGINT REFERENCES animals(id) ON DELETE CASCADE,
+    temperature NUMERIC(5,2),
+    sleep_time NUMERIC(5,2), 
+    latitude NUMERIC(9,6),
+    longitude NUMERIC(9,6),
+	accel_x NUMERIC(7,4),                
+    accel_y NUMERIC(7,2),                
+    accel_z NUMERIC(7,2),        
+    collected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+
+
+-- Inclusão das Raças
+INSERT INTO breeds (name) VALUES
+('Holandesa'),
+('Jersey'),
+('Girolando'),
+('Gir'),
+('Nelore'),
+('Pardo-Suíço'),
+('Guzerá'),
+('Guzolando'),
+('Sindi'),
+('Guernsey'),
+('Ayrshire');
