@@ -3,13 +3,14 @@ default: &default
   adapter: postgresql
   encoding: unicode
   username: postgres
-  password: sricardo@123
-  host: localhost
-
+  password: ricardo@123
+  host: 127.0.0.1
+  port: 5432
+  pool: 5
 
 development:
   <<: *default
-  database: backend_dairy_sense_development
+  database: Dados
 
 test:
   <<: *default
@@ -20,7 +21,7 @@ production:
     <<: *default
     database: Dados
     username: postgres
-    password: ricardo@123
+    password: <%= ENV['ricardo@123'] %>
   cache:
     <<: *primary_production
     database: backend_dairy_sense_production_cache
