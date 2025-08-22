@@ -1,0 +1,35 @@
+
+default: &default
+ adapter: postgresql
+  encoding: unicode
+  username: postgres
+  password: sua_senha
+  host: localhost
+
+
+development:
+  <<: *default
+  database: backend_dairy_sense_development
+
+test:
+  <<: *default
+  database: backend_dairy_sense_test
+
+production:
+  primary: &primary_production
+    <<: *default
+    database: Dados
+    username: postgres
+    password: ricardo@123
+  cache:
+    <<: *primary_production
+    database: backend_dairy_sense_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_production
+    database: backend_dairy_sense_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_production
+    database: backend_dairy_sense_production_cable
+    migrations_paths: db/cable_migrate
