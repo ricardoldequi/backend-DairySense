@@ -34,11 +34,11 @@ CREATE TABLE breeds (
 -- Animais
 CREATE TABLE animals (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE, -- id do usuário
     name VARCHAR(50),
-    breed_id BIGINT REFERENCES breeds(id) ON DELETE SET NULL,
-    age INT,
-	earring INT,
+    breed_id BIGINT REFERENCES breeds(id) ON DELETE SET NULL, -- id da raça
+    age INT, 
+	earring INT, --brinco
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -46,8 +46,8 @@ CREATE TABLE animals (
 -- Colares
 CREATE TABLE devices (
     id BIGSERIAL PRIMARY KEY,
-    serial_number VARCHAR(100) UNIQUE NOT NULL,
-	codigo INT,
+    serial_number VARCHAR(10) UNIQUE NOT NULL,
+	api_key VARCHAR(36) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -99,3 +99,12 @@ INSERT INTO breeds (name) VALUES
 ('Sindi'),
 ('Guernsey'),
 ('Ayrshire');
+
+-- Inclusão de Animais
+INSERT INTO animals (name, breed_id, age, earring) VALUES
+('Mansinha',1, 3, 12 ),
+('Xuxa',1, 7, 145 );
+
+--Inclusão de Colares
+INSERT INTO Devices (serial_number, api_key) VALUES
+('DS0001', '58567df6-233b-4607-971f-d80b6ca927a2');
