@@ -29,7 +29,7 @@ ActiveRecord::Schema[8.0].define(version: 0) do
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
 
-    t.unique_constraint ["name"], name: "breeds_name_key"
+    t.unique_constraint [ "name" ], name: "breeds_name_key"
   end
 
   create_table "device_animals", force: :cascade do |t|
@@ -40,16 +40,16 @@ ActiveRecord::Schema[8.0].define(version: 0) do
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
 
-    t.unique_constraint ["device_id", "animal_id", "start_date"], name: "unique_device_animal_period"
+    t.unique_constraint [ "device_id", "animal_id", "start_date" ], name: "unique_device_animal_period"
   end
 
   create_table "devices", force: :cascade do |t|
-    t.string "serial_number", limit: 100, null: false
-    t.integer "codigo"
+    t.string "serial_number", limit: 10, null: false
+    t.string "api_key", limit: 36, null: false
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
 
-    t.unique_constraint ["serial_number"], name: "devices_serial_number_key"
+    t.unique_constraint [ "serial_number" ], name: "devices_serial_number_key"
   end
 
   create_table "readings", force: :cascade do |t|
@@ -74,7 +74,7 @@ ActiveRecord::Schema[8.0].define(version: 0) do
     t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
 
-    t.unique_constraint ["email"], name: "users_email_key"
+    t.unique_constraint [ "email" ], name: "users_email_key"
   end
 
   add_foreign_key "animals", "breeds", name: "animals_breed_id_fkey", on_delete: :nullify
