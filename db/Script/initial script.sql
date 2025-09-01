@@ -18,7 +18,7 @@ CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(120) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
+    password_digest TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -108,3 +108,7 @@ INSERT INTO animals (name, breed_id, age, earring) VALUES
 --Inclusão de Colares
 INSERT INTO Devices (serial_number, api_key) VALUES
 ('DS0001', '58567df6-233b-4607-971f-d80b6ca927a2');
+
+-- Inclusão de Usuário Admin
+INSERT INTO users (name, email, password_digest)VALUES
+ ('admin','ricardo.dequi02@gmail.com','$2a$12$7GyylJ.xYbfIAStF6tTnSumoTk6U4Pg0UsOpViO3JN58OWvlHpDIm');
