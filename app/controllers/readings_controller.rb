@@ -1,6 +1,7 @@
 class ReadingsController < ApplicationController
     include Authenticable
 
+  # POST /readings
   def create
   registros = params["readings"]
 
