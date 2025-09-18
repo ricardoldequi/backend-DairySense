@@ -1,4 +1,7 @@
+
 class Device < ApplicationRecord
+  has_many :device_animals
+  has_many :animals, through: :device_animals
   has_many :readings
 
   before_validation :generate_api_key, on: :create
