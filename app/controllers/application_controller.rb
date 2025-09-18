@@ -17,8 +17,10 @@ class ApplicationController < ActionController::API
       token = auth_header.split(" ").last
       begin
         decoded = JWT.decode(token, Rails.application.credentials.secret_key_base, true, algorithm: "HS256")
+        Rails.logger.info "Decoded token: #{decoded}"
         decoded.first
-      rescue JWT::DecodeError
+      rescue JWT::DecodeError => e
+        Rails.logger.error "Decode error: #{e.message}"
         nil
       end
     end
@@ -27,7 +29,7 @@ class ApplicationController < ActionController::API
   def authorized_user
     decoded_token = decode_token()
     if decoded_token
-      user_id = decoded_token["user_id"]
+      user_id = decoded_token.with_indifferent_access[:user_id]
       @user = User.find_by(id: user_id)
     end
   end
