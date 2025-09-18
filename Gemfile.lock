@@ -117,7 +117,7 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.13.2)
-    jwt (2.10.2)
+    jwt (3.1.2)
       base64
     kamal (2.7.0)
       activesupport (>= 7.0)
@@ -307,7 +307,7 @@ DEPENDENCIES
   brakeman
   debug
   factory_bot_rails
-  jwt (~> 2.5)
+  jwt (~> 3.1)
   kamal
   pg (~> 1.1)
   puma (>= 5.0)
