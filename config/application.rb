@@ -16,5 +16,9 @@ module BackendDairySense
     config.autoload_lib(ignore: %w[assets tasks])
 
     config.api_only = true
+
+    # Set timezone to Brasilia (UTC-3)
+    config.time_zone = 'America/Sao_Paulo'
+    config.active_record.default_timezone = :local
   end
 end

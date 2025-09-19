@@ -1,0 +1,2 @@
+class DeviceAnimal < ApplicationRecord
+end
