@@ -82,9 +82,37 @@ CREATE TABLE readings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- baseline de atividade
+CREATE TABLE activity_baselines (
+  id BIGSERIAL PRIMARY KEY,
+  animal_id BIGINT NOT NULL,
+  hour_of_day INT NOT NULL,
+  baseline_enmo FLOAT NOT NULL,
+  mad_enmo NUMERIC(10,6) NOT NULL DEFAULT 0.0;
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (animal_id) REFERENCES animals(id)
+);
 
+-- tabela de Alertas 
 
+CREATE TABLE alerts (
+  id BIGSERIAL PRIMARY KEY,
+  device_animal_id BIGINT NOT NULL REFERENCES device_animals(id) ON DELETE CASCADE,
+  alert_type VARCHAR NOT NULL,
+  detected_at TIMESTAMP NOT NULL,
+  z_score DOUBLE PRECISION,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Índices para otimizar consultas
+CREATE INDEX index_activity_baselines_on_animal_id ON activity_baselines (animal_id);
+CREATE UNIQUE INDEX idx_baseline_animal_hour_period ON activity_baselines (animal_id, hour_of_day, period_start, period_end);
+CREATE INDEX index_alerts_on_device_animal_id ON public.alerts (device_animal_id);
+CREATE INDEX index_alerts_on_detected_at ON public.alerts (detected_at);
 
 -- Inclusão das Raças
 INSERT INTO breeds (name) VALUES

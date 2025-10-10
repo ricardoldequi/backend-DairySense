@@ -18,7 +18,7 @@ module BackendDairySense
     config.api_only = true
 
     # Set timezone to Brasilia (UTC-3)
-    config.time_zone = 'America/Sao_Paulo'
+    config.time_zone = "America/Sao_Paulo"
     config.active_record.default_timezone = :local
   end
 end
