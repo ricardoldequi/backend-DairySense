@@ -1,5 +1,6 @@
 class CioDetectionJob
   include Sidekiq::Job
+  sidekiq_options queue: :default
 
   # Args:
   # - animal_id: filtra um animal específico (opcional)

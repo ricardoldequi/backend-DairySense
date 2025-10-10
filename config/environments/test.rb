@@ -50,4 +50,7 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Evita carregar o job do Sidekiq durante os testes
+  Rails.autoloaders.main.ignore(Rails.root.join("app/jobs/cio_detection_job.rb"))
 end
