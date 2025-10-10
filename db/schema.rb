@@ -77,6 +77,33 @@ ActiveRecord::Schema[8.0].define(version: 0) do
     t.unique_constraint [ "email" ], name: "users_email_key"
   end
 
+  create_table "activity_baselines", force: :cascade do |t|
+    t.integer "animal_id", null: false
+    t.integer "hour_of_day", null: false
+    t.float "baseline_enmo", null: false
+    t.float "mad_enmo", null: false, default: 0.0
+    t.date "period_start", null: false
+    t.date "period_end", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "activity_baselines", [ "animal_id" ], name: "index_activity_baselines_on_animal_id"
+  add_index "activity_baselines", [ "animal_id", "hour_of_day", "period_start", "period_end" ], name: "idx_baseline_animal_hour_period", unique: true
+
+  create_table "alerts", force: :cascade do |t|
+    t.bigint "device_animal_id", null: false
+    t.string "alert_type", null: false
+    t.datetime "detected_at", null: false
+    t.float "z_score"
+    t.datetime "created_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
+    t.datetime "updated_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }
+  end
+
+  add_index "alerts", [ "device_animal_id" ], name: "index_alerts_on_device_animal_id"
+  add_index "alerts", [ "detected_at" ], name: "index_alerts_on_detected_at"
+
+  add_foreign_key "alerts", "device_animals", name: "alerts_device_animal_id_fkey", on_delete: :cascade
   add_foreign_key "animals", "breeds", name: "animals_breed_id_fkey", on_delete: :nullify
   add_foreign_key "animals", "users", name: "animals_user_id_fkey", on_delete: :cascade
   add_foreign_key "device_animals", "animals", name: "device_animals_animal_id_fkey", on_delete: :cascade
