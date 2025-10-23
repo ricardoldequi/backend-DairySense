@@ -20,5 +20,12 @@ module BackendDairySense
     # Set timezone to Brasilia (UTC-3)
     config.time_zone = "America/Sao_Paulo"
     config.active_record.default_timezone = :local
+
+    # API-only com sessão p/ Sidekiq Web
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore,
+                          key: "_dairysense_session",
+                          same_site: :lax,
+                          secure: Rails.env.production?
   end
 end

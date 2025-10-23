@@ -106,7 +106,8 @@ class CioDetector
   end
 
   def persist_alert(links, ts, z_peak)
-    # evita duplicar alertas (proximas 3 horas)
+    Rails.logger.info("[CioDetector] criando alert ts=#{ts} z_peak=#{z_peak}")
+
     return if Alert.for_animal(@animal.id)
                    .where(alert_type: "estrus")
                    .where(detected_at: (ts - 3.hours)..(ts + 3.hours))

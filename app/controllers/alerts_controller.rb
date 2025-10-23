@@ -1,13 +1,10 @@
 class AlertsController < ApplicationController
   before_action :authorize
 
-  # GET /alerts?animal_id=2&start=YYYY-MM-DD&end=YYYY-MM-DD
+  # GET /api/alerts?animal_id=2&start=YYYY-MM-DD&end=YYYY-MM-DD
   def index
     rel = Alert.includes(device_animal: :animal).order(detected_at: :desc)
-
-    if params[:animal_id].present?
-      rel = rel.for_animal(params[:animal_id])
-    end
+    rel = rel.joins(:device_animal).where(device_animals: { animal_id: params[:animal_id] }) if params[:animal_id].present?
 
     if params[:start].present? && params[:end].present?
       start_at = Time.zone.parse(params[:start]).beginning_of_day
@@ -19,7 +16,7 @@ class AlertsController < ApplicationController
       {
         id: a.id,
         device_animal_id: a.device_animal_id,
-        animal_id: a.animal_id,
+        animal_id: a.device_animal.animal_id,
         alert_type: a.alert_type,
         detected_at: a.detected_at,
         z_score: a.z_score
@@ -29,43 +26,44 @@ class AlertsController < ApplicationController
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  # POST /alerts
-  # Body JSON:
-  # { device_animal_id, alert_type, detected_at, z_score } ==OU== { animal_id, alert_type, detected_at, z_score } -> resolve o vínculo ativo pelo detected_at
-  def create
-    payload = params.permit(:device_animal_id, :animal_id, :alert_type, :detected_at, :z_score)
+  # GET /api/alerts/recent?since=ISO8601&last_id=123&animal_id=2&limit=100
+  # Se last_id for informado, ignora since e retorna alerts com id > last_id.
+  def recent
+    limit = params[:limit].to_i
+    limit = 100 if limit <= 0 || limit > 500
 
-    device_animal_id = payload[:device_animal_id]
-    if device_animal_id.blank?
+    rel = Alert.includes(device_animal: :animal)
+    rel = rel.joins(:device_animal).where(device_animals: { animal_id: params[:animal_id] }) if params[:animal_id].present?
 
-      animal_id = payload.require(:animal_id)
-      detected_at = Time.zone.parse(payload.require(:detected_at))
-      link = DeviceAnimal.covering(detected_at.to_date).where(animal_id: animal_id)
-                         .order(start_date: :desc).first
-      return render json: { error: "Sem vínculo ativo para o animal na data" }, status: :unprocessable_entity unless link
-      device_animal_id = link.id
+    if params[:last_id].present?
+      rel = rel.where("alerts.id > ?", params[:last_id].to_i)
+    else
+      since = params[:since].present? ? Time.zone.parse(params[:since]) : 15.minutes.ago
+      rel = rel.where("detected_at >= ?", since)
     end
 
-    alert = Alert.create!(
-      device_animal_id: device_animal_id,
-      alert_type: payload.require(:alert_type),
-      detected_at: Time.zone.parse(payload.require(:detected_at)),
-      z_score: payload[:z_score]
-    )
+    rel = rel.order(:detected_at).limit(limit)
+    items = rel.map { |a|
+      {
+        id: a.id,
+        device_animal_id: a.device_animal_id,
+        animal_id: a.device_animal.animal_id,
+        alert_type: a.alert_type,
+        detected_at: a.detected_at,
+        z_score: a.z_score,
+        message: "Animal #{a.device_animal.animal_id} está com suspeita de cio em #{a.detected_at.iso8601}"
+      }
+    }
 
-    render json: { id: alert.id }, status: :created
-  rescue ActionController::ParameterMissing => e
-    render json: { error: "Parâmetro obrigatório: #{e.param}" }, status: :bad_request
+    last = items.last
+    response.set_header("Last-Modified", last[:detected_at].httpdate) if last
+
+    render json: {
+      count: items.size,
+      items: items,
+      next_cursor: last ? { last_id: last[:id], since: last[:detected_at].iso8601 } : nil
+    }
   rescue => e
     render json: { error: e.message }, status: :unprocessable_entity
-  end
-
-  # DELETE /alerts/:id
-  def destroy
-    alert = Alert.find(params[:id])
-    alert.destroy
-    head :no_content
-  rescue ActiveRecord::RecordNotFound
-    render json: { error: "Alert não encontrado" }, status: :not_found
   end
 end

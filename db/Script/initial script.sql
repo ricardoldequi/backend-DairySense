@@ -88,7 +88,7 @@ CREATE TABLE activity_baselines (
   animal_id BIGINT NOT NULL,
   hour_of_day INT NOT NULL,
   baseline_enmo FLOAT NOT NULL,
-  mad_enmo NUMERIC(10,6) NOT NULL DEFAULT 0.0;
+  mad_enmo NUMERIC(10,6) NOT NULL DEFAULT 0.0,
   period_start DATE NOT NULL,
   period_end DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -130,12 +130,18 @@ INSERT INTO breeds (name) VALUES
 
 -- Inclusão de Animais
 INSERT INTO animals (name, breed_id, age, earring) VALUES
-('Mansinha',1, 3, 12 ),
-('Xuxa',1, 7, 145 );
+('animal teste',1, 3, 12 ),
+('Periquita',1, 7, 145 );
 
 --Inclusão de Colares
 INSERT INTO Devices (serial_number, api_key) VALUES
-('DS0001', '58567df6-233b-4607-971f-d80b6ca927a2');
+('DS0001', '58567df6-233b-4607-971f-d80b6ca927a2'),
+('DS0002', '95a08b68-a5b1-4d81-9b41-2cc48133be89');
+
+--Inclusão de Relação entre Dispositivos e Animais
+INSERT INTO device_animals (device_id, animal_id, start_date) VALUES
+(2, 2, '2025-10-17 08:00:00'),
+(1, 1, '2024-01-16 09:00:00');
 
 -- Inclusão de Usuário Admin
 INSERT INTO users (name, email, password_digest)VALUES

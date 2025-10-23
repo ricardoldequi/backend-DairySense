@@ -1,0 +1,9 @@
+cio_detection:
+  cron: "*/10 * * * *"     # a cada 10 min
+  class: "CioDetectionJob"
+  queue: detectors
+  args:
+    since_minutes: 180
+    sustain_minutes: 40
+    window_minutes: 10
+    z_threshold: 3.0
