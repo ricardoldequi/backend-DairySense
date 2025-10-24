@@ -39,3 +39,4 @@
 # Credenciais e secrets
 /config/master.key
 /config/credentials.yml.enc
+/config/credentials/production.key

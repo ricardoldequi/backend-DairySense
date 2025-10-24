@@ -11,6 +11,7 @@ module BackendDairySense
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
 
+    config.active_job.queue_adapter = :sidekiq
 
 
     config.autoload_lib(ignore: %w[assets tasks])

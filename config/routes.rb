@@ -1,18 +1,39 @@
+require "sidekiq/web"
+require "sidekiq/cron/web"
+
+Sidekiq::Web.use Rack::Auth::Basic do |username, password|
+  username == ENV['SIDEKIQ_USERNAME'] && password == ENV['SIDEKIQ_PASSWORD']
+end
+
 Rails.application.routes.draw do
-  resources :animals do
-    resources :activity_baselines, only: [ :index, :create ] do
-      collection do
-        delete :destroy
+  mount Sidekiq::Web => "/sidekiq"
+
+  namespace :api do
+    root to: proc { [ 200, {}, [ "API DairySense" ] ] }
+
+    
+    resources :animals do
+      resources :activity_baselines, only: [ :index, :create ] do
+        collection { delete :destroy }
       end
     end
+    
+     resources :breeds, only: [:index] do
+      collection { get :names }
+    end
+
+    resources :device_animals
+    resources :devices
+    resources :users do
+      collection do
+        post :login
+      end
+    end
+
+    resources :readings, only: :create
+    resources :alerts, only: [ :index, :create, :destroy ]
   end
 
-  resources :device_animals
-  resources :devices
-  resources :users
-  post "/login", to: "users#login"
-    resources :readings, only: :create
-      resources :alerts, only: [ :index, :create, :destroy ]
-  get "/favicon.ico", to: proc { [ 204, {}, [] ] }
-  root to: proc { [ 200, {}, [ "API DairySense" ] ] }
+   get "/health", to: proc { [200, {}, ["ok"]] }
+   get "/favicon.ico", to: proc { [ 204, {}, [] ] }
 end

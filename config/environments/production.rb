@@ -76,14 +76,29 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  # SSL 
+  config.force_ssl = true
 
-   config.hosts << /.*\.ngrok-free\.app/
-  # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
+  # Hosts permitidos para proteção contra DNS rebinding
+  config.hosts = [
+    /\A(.+\.)?dairysense\.com\.br\z/,
+    "209.38.139.252"
+  ]
+
+  #proxy/rede Docker
+  config.action_dispatch.trusted_proxies = [
+    IPAddr.new("10.0.0.0/8"),
+    IPAddr.new("172.16.0.0/12"),
+    IPAddr.new("192.168.0.0/16")
+  ]
+
+  #cookies para Sidekiq Web
+  config.middleware.use ActionDispatch::Cookies
+  config.middleware.use ActionDispatch::Session::CookieStore,
+                        key: "_dairysense_session",
+                        same_site: :lax,
+                        secure: true
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
