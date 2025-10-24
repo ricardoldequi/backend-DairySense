@@ -2,7 +2,7 @@ require "sidekiq/web"
 require "sidekiq/cron/web"
 
 Sidekiq::Web.use Rack::Auth::Basic do |username, password|
-  username == ENV['SIDEKIQ_USERNAME'] && password == ENV['SIDEKIQ_PASSWORD']
+  username == ENV["SIDEKIQ_USERNAME"] && password == ENV["SIDEKIQ_PASSWORD"]
 end
 
 Rails.application.routes.draw do
@@ -11,14 +11,14 @@ Rails.application.routes.draw do
   namespace :api do
     root to: proc { [ 200, {}, [ "API DairySense" ] ] }
 
-    
+
     resources :animals do
       resources :activity_baselines, only: [ :index, :create ] do
         collection { delete :destroy }
       end
     end
-    
-     resources :breeds, only: [:index] do
+
+     resources :breeds, only: [ :index ] do
       collection { get :names }
     end
 
@@ -34,6 +34,6 @@ Rails.application.routes.draw do
     resources :alerts, only: [ :index, :create, :destroy ]
   end
 
-   get "/health", to: proc { [200, {}, ["ok"]] }
+   get "/health", to: proc { [ 200, {}, [ "ok" ] ] }
    get "/favicon.ico", to: proc { [ 204, {}, [] ] }
 end

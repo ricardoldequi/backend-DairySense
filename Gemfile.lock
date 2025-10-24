@@ -330,7 +330,7 @@ DEPENDENCIES
   railties (~> 8.0.2)
   redis (>= 4.0.1)
   rubocop-rails-omakase
-  sidekiq (~> 7.3)
+  sidekiq (~> 7.2)
   sidekiq-cron (~> 1.12)
   solid_cable
   solid_cache

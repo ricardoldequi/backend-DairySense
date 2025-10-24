@@ -76,7 +76,7 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # SSL 
+  # SSL
   config.force_ssl = true
 
   # Hosts permitidos para proteção contra DNS rebinding
@@ -85,14 +85,14 @@ Rails.application.configure do
     "209.38.139.252"
   ]
 
-  #proxy/rede Docker
+  # proxy/rede Docker
   config.action_dispatch.trusted_proxies = [
     IPAddr.new("10.0.0.0/8"),
     IPAddr.new("172.16.0.0/12"),
     IPAddr.new("192.168.0.0/16")
   ]
 
-  #cookies para Sidekiq Web
+  # cookies para Sidekiq Web
   config.middleware.use ActionDispatch::Cookies
   config.middleware.use ActionDispatch::Session::CookieStore,
                         key: "_dairysense_session",
