@@ -37,6 +37,3 @@ Rails.application.routes.draw do
    get "/health", to: proc { [ 200, {}, [ "ok" ] ] }
    get "/favicon.ico", to: proc { [ 204, {}, [] ] }
 end
-
-
-

@@ -1,38 +1,25 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
-  # ==============================
-  # 🔧 CONFIGURAÇÕES GERAIS
-  # ==============================
-
   # Código não é recarregado entre requisições
   config.enable_reloading = false
 
   # para o sidekiq
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue } }
-  # Carrega tudo na inicialização (melhor performance)
+
   config.eager_load = true
 
-  # Oculta erros detalhados (padrão produção)
   config.consider_all_requests_local = false
 
-  # Cacheia arquivos públicos (assets)
   config.public_file_server.headers = {
     "Cache-Control" => "public, max-age=#{1.year.to_i}"
   }
 
-  # Armazenamento de arquivos locais
   config.active_storage.service = :local
 
-  # ==============================
-  # 💎 SSL / PROXY / CLOUDFLARE
-  # ==============================
 
-  # ❌ NÃO força SSL (Cloudflare SSL flexível faz o HTTPS externamente)
   config.force_ssl = false
-
-  # ✅ Assume que o acesso vem por HTTPS (via Cloudflare)
   config.assume_ssl = true
 
   # Hosts permitidos — domínio e IP do servidor
@@ -41,7 +28,7 @@ Rails.application.configure do
     "209.38.139.252"
   ]
 
-  # Confia nos proxies internos do Docker e da Cloudflare
+  # definicao dos proxies
   config.action_dispatch.trusted_proxies = [
     IPAddr.new("10.0.0.0/8"),      # Rede Docker
     IPAddr.new("172.16.0.0/12"),   # Rede Docker
@@ -58,29 +45,21 @@ Rails.application.configure do
     IPAddr.new("198.41.128.0/17")
   ]
 
-  # ==============================
-  # 🧠 LOGS E MONITORAMENTO
-  # ==============================
 
-  config.log_tags = [:request_id]
+
+  config.log_tags = [ :request_id ]
   config.logger = ActiveSupport::TaggedLogging.logger(STDOUT)
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.silence_healthcheck_path = "/up"
   config.active_support.report_deprecations = false
 
-  # ==============================
-  # 🚀 CACHE / JOBS
-  # ==============================
 
-  # Usa Redis / SolidCache
+
   config.cache_store = :solid_cache_store
 
-  # Adapta fila de jobs (Sidekiq)
   config.active_job.queue_adapter = :sidekiq
 
-  # ==============================
-  # ✉️ E-MAIL (ajuste se precisar)
-  # ==============================
+
 
   config.action_mailer.default_url_options = { host: "dairysense.com.br", protocol: "https" }
   # config.action_mailer.smtp_settings = {
@@ -91,22 +70,14 @@ Rails.application.configure do
   #   authentication: :plain
   # }
 
-  # ==============================
-  # 🌍 INTERNACIONALIZAÇÃO
-  # ==============================
+
 
   config.i18n.fallbacks = true
 
-  # ==============================
-  # 🧱 BANCO DE DADOS
-  # ==============================
 
   config.active_record.dump_schema_after_migration = false
-  config.active_record.attributes_for_inspect = [:id]
+  config.active_record.attributes_for_inspect = [ :id ]
 
-  # ==============================
-  # 🍪 SESSÃO / COOKIES (Sidekiq Web)
-  # ==============================
 
   config.middleware.use ActionDispatch::Cookies
   config.middleware.use ActionDispatch::Session::CookieStore,
