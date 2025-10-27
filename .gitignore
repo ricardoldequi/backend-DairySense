@@ -40,3 +40,8 @@
 /config/master.key
 /config/credentials.yml.enc
 /config/credentials/production.key
+
+
+#tests
+/test/controllers/device_animals_controller_test.rb
+/test/controllers/users_controller_test.rb
