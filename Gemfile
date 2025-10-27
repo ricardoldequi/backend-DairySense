@@ -12,7 +12,7 @@ gem "rack-cors"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
-
+gem "activerecord-import"
 gem "jwt", "~> 2.5"
 gem "railties", "~> 8.0.2"
 
@@ -38,7 +38,7 @@ gem "thruster", require: false
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 
-gem "sidekiq", "~> 7.2"
+gem "sidekiq", "7.2.1"
 gem "sidekiq-cron", "~> 1.12"
 gem "redis", ">= 4.0.1"
 
@@ -51,7 +51,6 @@ group :development, :test do
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
-  gem "activerecord-import"
 
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
