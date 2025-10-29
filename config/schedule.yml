@@ -3,7 +3,7 @@ cio_detection:
   class: "CioDetectionJob"
   queue: detectors
   args:
-    since_minutes: 180
-    sustain_minutes: 40
+    since_minutes: 2880 #2 dias
+    sustain_minutes: 30 #tempo de pico mínimo para considerar cio
     window_minutes: 10
-    z_threshold: 3.0
+    z_threshold: 2.5
