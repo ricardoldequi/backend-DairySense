@@ -10,22 +10,21 @@ module Api
       device = current_device
       return render json: { error: "Dispositivo não autenticado" }, status: :unauthorized unless device
 
+      Rails.logger.info("current_device_id=#{device.id} api_key=#{device.api_key}")
+
       readings = []
       avisos = []
 
       registros.each_with_index do |r, idx|
         collected_at = r["collected_at"].present? ? Time.zone.parse(r["collected_at"]) : Time.zone.now
 
-        # tenta vinculo ativo para o horário
-        device_animal = DeviceAnimal.where(device_id: device.id)
-                                    .where("start_date <= ? AND (end_date IS NULL OR end_date >= ?)", collected_at, collected_at)
-                                    .order(start_date: :desc)
-                                    .first
-        # fallback: usa o vínculo mais recente do device
-        device_animal ||= DeviceAnimal.where(device_id: device.id).order(start_date: :desc).first
+        device_animal = device.device_animals
+                              .covering(collected_at)
+                              .order(start_date: :desc)
+                              .first
 
         if device_animal.nil?
-          avisos << { index: idx, mensagem: "Sem vínculo de animal para o dispositivo" }
+          avisos << { index: idx, mensagem: "Sem vínculo de animal válido (fora do período)" }
           next
         end
 
@@ -40,7 +39,7 @@ module Api
         )
       end
 
-      return render json: { error: "Nenhuma leitura válida", avisos: avisos }, status: :unprocessable_content if readings.empty?
+      return render json: { error: "Nenhuma leitura válida", avisos: avisos }, status: :unprocessable_entity if readings.empty?
 
       result = Reading.import(readings)
       if result.failed_instances.any?

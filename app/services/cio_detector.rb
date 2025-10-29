@@ -5,7 +5,7 @@ class CioDetector
     @window = 10 if @window <= 0
     @z_th = z_threshold.to_f
     @sustain = sustain_minutes.to_i # trocar o valor de sustain_minutes se quiser que o periodo de detecção seja menor ou maior
-    @sustain = 60 if @sustain <= 0
+    @sustain = 30 if @sustain <= 0
     @since = since.in_time_zone
   end
 
@@ -39,71 +39,87 @@ class CioDetector
     periods.any? { |(ps, pe)| ps <= date && date <= pe }
   end
 
-  def process_day(device_ids, links, date)
-    from = date.in_time_zone.beginning_of_day
-    to   = date.in_time_zone.end_of_day
+ def process_day(device_ids, links, date)
+  from = date.in_time_zone.beginning_of_day
+  to   = date.in_time_zone.end_of_day
 
-    readings = Reading.where(device_id: device_ids, collected_at: from..to)
-                      .order(:collected_at)
-    return if readings.empty?
+  readings = Reading.where(device_id: device_ids, collected_at: from..to)
+                    .order(:collected_at)
+  return if readings.empty?
 
-    # agrupa por hora local (0 a 23)
-    readings.group_by { |r| r.collected_at.in_time_zone.hour }.each do |hour, rs|
-      # baseline de referência:ultima onde period_end <= date, para esta hora
-      ref = ActivityBaseline.where(animal_id: @animal.id, hour_of_day: hour)
-                            .where("period_end <= ?", date)
-                            .order(period_end: :desc)
-                            .first
-      next unless ref
+  step = @window.minutes
 
-      step = @window.minutes
-      by_window = rs.group_by { |r| floor_time(r.collected_at, step) }
+  # Agrupa o dia inteiro em janelas contínuas de @window, sem quebrar por hora
+  by_window = readings.group_by { |r| floor_time(r.collected_at, step) }
 
-      # ordena janelas no tempo
-      windows = by_window.keys.sort.map do |win_start|
-        enmos = by_window[win_start].map { |r| enmo(r) }
-        med = median(enmos)
-        [ win_start, med ]
-      end
+  #  Constrói [timestamp_da_janela, mediana_ENMO, baseline_ref] por janela
+  windows = by_window.keys.sort.map do |win_start|
+    enmos = by_window[win_start].map { |r| enmo(r) }
+    med   = median(enmos)
 
-      detect_runs_and_alert(links, ref, windows)
-    end
-  end
+    # baseline por hora da janela atual
+    hour  = win_start.in_time_zone.hour
+    ref = ActivityBaseline.where(animal_id: @animal.id, hour_of_day: hour)
+                          .where("period_end <= ?", date)
+                          .order(period_end: :desc)
+                          .first
+    # se não houver baseline pra essa hora, pula a janela
+    next unless ref
 
-  def detect_runs_and_alert(links, ref, windows)
-    eps = 0.01
-    run_minutes = 0
-    run_start = nil
-    peak_z = -Float::INFINITY
+    [ win_start, med, ref ]
+  end.compact
 
-    windows.each_cons(2) do |(t1, _), (t2, _)|
-      contiguous = ((t2.to_i - t1.to_i) == @window.minutes)
-    end
+  return if windows.empty?
 
-    windows.each_with_index do |(t, med), i|
-      denom = (ref.mad_enmo.to_f.abs < eps) ? eps : ref.mad_enmo.to_f
-      z = (med - ref.baseline_enmo.to_f) / denom
+  detect_runs_and_alert(links, windows, step)
+end
 
-      if z >= @z_th
-        run_start ||= t
-        run_minutes += @window
-        peak_z = [ peak_z, z ].max
-      else
-        # encerra sequencia
-        if run_minutes >= @sustain
-          persist_alert(links, run_start, peak_z)
-        end
-        run_minutes = 0
-        run_start = nil
-        peak_z = -Float::INFINITY
-      end
+  def detect_runs_and_alert(links, windows, step = @window.minutes)
+  eps = 1e-6
+  run_minutes = 0
+  run_start   = nil
+  peak_z      = -Float::INFINITY
+  prev_t      = nil
 
-      # final da série
-      if i == windows.size - 1 && run_minutes >= @sustain
+  #  tolerância de gap (ex: até 40 minutos sem leitura não quebra sequência)
+  gap_tolerance = 40.minutes
+
+  windows.each_with_index do |(t, med, ref), i|
+    # quebra sequência apenas se o buraco for maior que o tolerado
+    if prev_t && (t.to_i - prev_t.to_i) > (step + gap_tolerance)
+      if run_minutes >= @sustain
         persist_alert(links, run_start, peak_z)
       end
+      run_minutes = 0
+      run_start   = nil
+      peak_z      = -Float::INFINITY
+    end
+
+    denom = ref.mad_enmo.to_f.abs < eps ? eps : ref.mad_enmo.to_f
+    z = (med - ref.baseline_enmo.to_f) / denom
+
+    if z >= @z_th
+      run_start ||= t
+      run_minutes += @window
+      peak_z = [ peak_z, z ].max
+    else
+      if run_minutes >= @sustain
+        persist_alert(links, run_start, peak_z)
+      end
+      run_minutes = 0
+      run_start   = nil
+      peak_z      = -Float::INFINITY
+    end
+
+    prev_t = t
+
+    # final da série
+    if i == windows.size - 1 && run_minutes >= @sustain
+      persist_alert(links, run_start, peak_z)
     end
   end
+end
+
 
   def persist_alert(links, ts, z_peak)
     Rails.logger.info("[CioDetector] criando alert ts=#{ts} z_peak=#{z_peak}")

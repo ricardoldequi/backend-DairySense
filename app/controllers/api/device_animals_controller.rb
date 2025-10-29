@@ -1,7 +1,7 @@
 module Api
   class DeviceAnimalsController < ApplicationController
     before_action :set_device_animal, only: %i[ show update destroy ]
-      before_action :authorize
+    before_action :authorize
 
 
     # GET /device_animals
@@ -44,12 +44,12 @@ module Api
     private
       # Use callbacks to share common setup or constraints between actions.
       def set_device_animal
-        @device_animal = DeviceAnimal.find(params.expect(:id))
+        @device_animal = DeviceAnimal.find(params[:id])
       end
 
       # Only allow a list of trusted parameters through.
       def device_animal_params
-        params.expect(device_animal: [ :device_id, :animal_id, :start_date, :end_date ])
+        params.require(:device_animal).permit(:device_id, :animal_id, :start_date, :end_date)
       end
   end
 end
