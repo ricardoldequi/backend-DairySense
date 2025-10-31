@@ -38,7 +38,7 @@ gem "thruster", require: false
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 
-gem "sidekiq", "7.2.1"
+gem "sidekiq", "8.0.8"
 gem "sidekiq-cron", "~> 1.12"
 gem "redis", ">= 4.0.1"
 
